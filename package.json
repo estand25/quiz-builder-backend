@@ -12,13 +12,15 @@
     "nodemon": "^2.0.2"
   },
   "devDependencies": {
+    "coveralls": "^3.0.9",
     "jest": "^24.9.0",
     "mongoose-unique-validator": "^2.0.3",
     "supertest": "^4.0.2"
   },
   "scripts": {
     "test": "jest",
-    "server": "nodemon server.js"
+    "server": "nodemon server.js",
+    "coveralls": "npm run coveralls"
   },
   "keywords": [],
   "author": "Standley Eugene <standleyeugene20@hotmail.com>",
@@ -27,6 +29,11 @@
     "testEnvironment": "node",
     "coveragePathIgnorePatterns": [
       "/node_modules/"
+    ],
+    "collectCoverage": true,
+    "coverageReporters": [
+      "json",
+      "html"
     ]
   }
 }
