@@ -2,13 +2,13 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 
-const db = require('./db')
+const db = require('./src/db')
 
-const user = require('./routes/user-router')
-const quiz = require('./routes/quiz-router')
-const question = require('./routes/question-router')
-const userResponse = require('./routes/userResponse-router')
-const score = require('./routes/score-router')
+const user = require('./src/routes/user-router')
+const quiz = require('./src/routes/quiz-router')
+const question = require('./src/routes/question-router')
+const userResponse = require('./src/routes/userResponse-router')
+const score = require('./src/routes/score-router')
 
 const app = express()
 const apiPost = 3000
