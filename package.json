@@ -20,7 +20,8 @@
   "scripts": {
     "test": "jest",
     "server": "nodemon server.js",
-    "coveralls": "npm run coveralls"
+    "coverage": "NODE_ENV=test jest --coverage --coverageReporters=lcov",
+    "localcoverage": "jest --coverage --coverageReporters=lcov"
   },
   "keywords": [],
   "author": "Standley Eugene <standleyeugene20@hotmail.com>",
@@ -29,6 +30,9 @@
     "testEnvironment": "node",
     "coveragePathIgnorePatterns": [
       "/node_modules/"
+    ],
+    "collectCoverageFrom": [
+      "*.js"
     ],
     "collectCoverage": true,
     "coverageReporters": [
