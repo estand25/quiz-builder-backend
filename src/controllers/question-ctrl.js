@@ -1,19 +1,25 @@
 const Question = require('../models/question-model')
 const Quiz = require('../models/quiz-model')
+const _ = require('lodash')
 
 createQuestion = (req, res) => {
     const body = req.body
-
-    if(!body){
+    console.log('createQuestion', body);
+    
+    if(!body || _.isEmpty(body) || !req.hasOwnProperty('body')){
+        // console.log('createQuestion', "Inside");
         return res.status(400).json({
             success: false,
             message: 'You must provide a question',
         })
     }
+    // console.log('createQuestion', "after if");
 
     const question = new Question(body)
 
+    // console.log('createQuestion', question);
     if(!question){
+        // console.log('createQuestion 2', "Inside");
         return res.status(400).json({
             success: false,
             message: err
@@ -23,6 +29,7 @@ createQuestion = (req, res) => {
     question 
         .save()
         .then(() => {
+            // console.log('createQuestion 3', "Successfully");
             return res.status(201).json({
                 success: true,
                 id: question._id,
