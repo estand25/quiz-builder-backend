@@ -29,7 +29,7 @@
     "coverage__": "NODE_ENV=test jest --coverage --coverageReporters=lcov",
     "localcoverage__": "jest --coverage --coverageReporters=lcov",
     "coverage": "NODE_ENV=test nyc mocha tests --recursive --exit",
-    "localcoverage": "nyc mocha tests --recursive --exit"
+    "local": "nyc mocha tests --recursive --exit"
   },
   "nyc": {
     "all": false,
