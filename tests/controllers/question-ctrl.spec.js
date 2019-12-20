@@ -45,7 +45,7 @@ describe('Questions creations unit-test', () => {
 		const res = mockResponse();
 		
 		createQuestion(req,res)
-		expect(res.status).toHaveBeenCalledWith(statusCode.ACCEPTED);
+		expect(res.status).toHaveBeenCalledWith(statusCode.OK);
 	})
 })
 
@@ -89,7 +89,7 @@ describe('Question update/delete/get question by Id/get question unit-test', () 
 
 		updateQuestion(req2, res)
 
-		expect(res.status).toHaveBeenCalledWith(statusCode.ACCEPTED)
+		expect(res.status).toHaveBeenCalledWith(statusCode.OK)
 	})
 
 	it('Question deletes without crashing', () => {
@@ -99,7 +99,7 @@ describe('Question update/delete/get question by Id/get question unit-test', () 
 		}
 
 		deleteQuestion(req2, res)
-		expect(res.status).toHaveBeenCalledWith(statusCode.ACCEPTED)
+		expect(res.status).toHaveBeenCalledWith(statusCode.OK)
 	})
 
 	it('Question gets retrieved without crashing', () => {
@@ -109,7 +109,7 @@ describe('Question update/delete/get question by Id/get question unit-test', () 
 		}
 
 		getQuestionById(req2, res)
-		expect(res.status).toHaveBeenCalledWith(statusCode.ACCEPTED)
+		expect(res.status).toHaveBeenCalledWith(statusCode.OK)
 	})
 
 	it('All question gets retrieved without crashing', () => {
@@ -119,6 +119,6 @@ describe('Question update/delete/get question by Id/get question unit-test', () 
 		}
 
 		getQuestion(req2, res)
-		expect(res.status).toHaveBeenCalledWith(statusCode.ACCEPTED)
+		expect(res.status).toHaveBeenCalledWith(statusCode.OK)
 	})
 })

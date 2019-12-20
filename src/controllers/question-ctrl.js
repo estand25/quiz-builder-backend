@@ -35,7 +35,7 @@ createQuestion = (req, res) => {
     }
 
     questionSave(question)
-    questionSaveReturn(res, question, 'Question Created!', statusCode.ACCEPTED)
+    questionSaveReturn(res, question, 'Question Created!', statusCode.OK)
 }
 
 updateQuestion = (req, res) => {
@@ -93,7 +93,7 @@ updateQuestion = (req, res) => {
 
         try {
             questionSave(question)
-            questionSaveReturn(res, question, 'Question updated!', statusCode.ACCEPTED)
+            questionSaveReturn(res, question, 'Question updated!', statusCode.OK)
         } catch (error) {
             questionSaveReturn(res, question, 'Question not updated!', statusCode.NOT_FOUND)
         }    

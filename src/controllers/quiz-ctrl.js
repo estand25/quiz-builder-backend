@@ -34,7 +34,7 @@ createQuiz = (req, res) => {
     }
 
     quizSave(quiz)
-    quizSaveReturn(res, quiz, 'Quiz Created!', statusCode.ACCEPTED )
+    quizSaveReturn(res, quiz, 'Quiz Created!', statusCode.OK )
 }
 
 updateQuiz = (req, res) => {
@@ -77,7 +77,7 @@ updateQuiz = (req, res) => {
 
         try {
             quizSave(quiz)
-            quizSaveReturn(res, quiz, 'Quiz updated!', statusCode.ACCEPTED )
+            quizSaveReturn(res, quiz, 'Quiz updated!', statusCode.OK )
         } catch (error) {
             quizSaveReturn(res, quiz, error, statusCode.NOT_FOUND )
         }
@@ -103,7 +103,7 @@ deleteQuiz = async(req,res) => {
             }
 
             return res
-                .status(statusCode.ACCEPTED)
+                .status(statusCode.OK)
                 .json({ 
                     success: true, 
                     data: quiz 
@@ -128,7 +128,7 @@ getQuizById = async (req, res) => {
                 })
         }
 
-        return res.status(statusCode.ACCEPTED).json({
+        return res.status(statusCode.OK).json({
             success: true, 
             data: quiz
         })
@@ -153,7 +153,7 @@ getQuiz = async (req, res) => {
         }
 
         return res
-            .status(statusCode.ACCEPTED).json({ 
+            .status(statusCode.OK).json({ 
                 success: true, 
                 data: quiz 
             })

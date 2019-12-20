@@ -1,10 +1,24 @@
 const Score = require('../models/score-model')
+const _ = require('lodash')
+const statusCode = require('http-status-codes');
+
+scoreSave = (score) => {
+    return score.save()
+}
+
+scoreSaveReturn = (res, score, message, statusCode) => {
+    return res.status(statusCode).json({
+        success: true,
+        id: score._id,
+        message: message,
+    })
+}
 
 createScore = (req, res) => {
     const body = req.body
-
-    if(!body){
-        return res.status(400).json({
+    
+    if(!body || _.isEmpty(body) || !req.hasOwnProperty('body')){
+        return res.status(statusCode.BAD_REQUEST).json({
             success: false,
             message: 'You must provide a score',
         })
@@ -13,28 +27,21 @@ createScore = (req, res) => {
     const score = new Score(body)
 
     if(!score){
-        return res.status(400).json({
+        return res.status(statusCode.NOT_FOUND).json({
             success: false,
             message: err
         })
     }
 
-    score 
-        .save()
-        .then(() => {
-            return res.status(201).json({
-                success: true,
-                id: score._id,
-                message: 'Score Created!',
-            })
-        })
+    scoreSave(score)
+    scoreSaveReturn(res, score, 'Score Created!', statusCode.OK)
 }
 
 updateScore = (req, res) => {
     const body = req.body
-
-    if(!body){
-        return res.status(400).json({
+    
+    if(!body || _.isEmpty(body) || !req.hasOwnProperty('body')){
+        return res.status(statusCode.BAD_REQUEST).json({
             success: false,
             message: 'Your must provide a valid body to update',
         })
@@ -42,12 +49,11 @@ updateScore = (req, res) => {
 
     Score.findOne({ _id: req.params.id }, (err, score) => {
         if(err){
-            return res.status(404).json({
+            return res.status(statusCode.NOT_FOUND).json({
                 success: false,
                 message: err
             })
         }
-
 
         if(body.quizId !== undefined)
             score.quizId = body.quizId
@@ -69,21 +75,12 @@ updateScore = (req, res) => {
         else
             score.nonAnswered = score.nonAnswered
             
-        score
-            .save()
-            .then(() => {
-                return res.status(200).json({
-                    success: true,
-                    id: score._id,
-                    message: 'Score updated!'
-                })
-            })
-            .catch( error => {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Score not updated!'
-                })
-            })
+        try {
+            scoreSave(score)
+            scoreSaveReturn(res, score, 'Score updated!', statusCode.OK)
+        } catch (error) {
+            scoreSaveReturn(res, score, 'Score not updated!', statusCode.NOT_FOUND)
+        }
     })
 }
 
@@ -91,7 +88,7 @@ deleteScore = async(req, res) => {
     await Score.findOneAndDelete(
         { _id: req.params.id }, (err, score) => {
             if(err){
-                return res.status(400).json({ 
+                return res.status(statusCode.BAD_REQUEST).json({ 
                     success: false, 
                     message: err
                 })
@@ -99,12 +96,12 @@ deleteScore = async(req, res) => {
 
             if(!score){
                 return res
-                    .status(404).json({ 
+                    .status(statusCode.NOT_FOUND).json({ 
                         success: false, 
                         message: `Note not found` })
             }
 
-            return res.status(200).json({ 
+            return res.status(statusCode.OK).json({ 
                 success: true, 
                 data: score 
             })
@@ -114,7 +111,7 @@ deleteScore = async(req, res) => {
 getScoreById = async (req, res) => {
     await Score.findOne({ _id: req.params.id }, (err, score) => {
         if(err){
-            return res.status(400).json({ 
+            return res.status(statusCode.BAD_REQUEST).json({ 
                 success: false, 
                 message: err
             })
@@ -122,13 +119,13 @@ getScoreById = async (req, res) => {
 
         if(!score){
             return res
-                .status(404).json({ 
+                .status(statusCode.NOT_FOUND).json({ 
                     success: false, 
                     message: `Note not found` 
                 })
         }
 
-        return res.status(200).json({
+        return res.status(statusCode.OK).json({
             success: true, 
             data: score
         })
@@ -138,7 +135,7 @@ getScoreById = async (req, res) => {
 getScore = async (req, res) => {
     await Score.find({}, (err, score) => {
         if(err){
-            return res.status(400).json({ 
+            return res.status(statusCode.BAD_REQUEST).json({ 
                 success: false, 
                 message: err
             })
@@ -146,14 +143,14 @@ getScore = async (req, res) => {
 
         if(!score.length){
             return res
-                .status(404).json({ 
+                .status(statusCode.NOT_FOUND).json({ 
                     success: false, 
                     message: `Note not found` 
                 })
         }
 
         return res
-            .status(200).json({ 
+            .status(statusCode.OK).json({ 
                 success: true, 
                 data: score 
             })

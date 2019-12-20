@@ -39,7 +39,7 @@ describe('Quiz creations unit-test', () => {
 		const res = mockResponse();
 		
 		createQuiz(req,res)
-		expect(res.status).toHaveBeenCalledWith(statusCode.ACCEPTED);
+		expect(res.status).toHaveBeenCalledWith(statusCode.OK);
 	})
 })
 
@@ -71,7 +71,7 @@ describe('Quiz update/delete/get question by Id/get question unit-test', () => {
 
 		updateQuiz(req2, res)
 
-		expect(res.status).toHaveBeenCalledWith(statusCode.ACCEPTED)
+		expect(res.status).toHaveBeenCalledWith(statusCode.OK)
 	})
 
 	it('quiz deletes without crashing', () => {
@@ -81,7 +81,7 @@ describe('Quiz update/delete/get question by Id/get question unit-test', () => {
 		}
 
 		deleteQuiz(req2, res)
-		expect(res.status).toHaveBeenCalledWith(statusCode.ACCEPTED)
+		expect(res.status).toHaveBeenCalledWith(statusCode.OK)
 	})
 
 	it('Quiz gets retrieved without crashing', () => {
@@ -91,7 +91,7 @@ describe('Quiz update/delete/get question by Id/get question unit-test', () => {
 		}
 
 		getQuizById(req2, res)
-		expect(res.status).toHaveBeenCalledWith(statusCode.ACCEPTED)
+		expect(res.status).toHaveBeenCalledWith(statusCode.OK)
 	})
 
 	it('All quiz gets retrieved without crashing', () => {
@@ -101,6 +101,6 @@ describe('Quiz update/delete/get question by Id/get question unit-test', () => {
 		}
 
 		getQuiz(req2, res)
-		expect(res.status).toHaveBeenCalledWith(statusCode.ACCEPTED)
+		expect(res.status).toHaveBeenCalledWith(statusCode.OK)
 	})
 })
