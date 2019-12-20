@@ -1,10 +1,24 @@
 const Quiz = require('../models/quiz-model')
+const _ = require('lodash')
+const statusCode = require('http-status-codes');
+
+quizSave = (quiz) => {
+    return quiz.save()
+}
+
+quizSaveReturn = (res, quiz, message, statusCode) => {
+    return res.status(statusCode).json({
+        success: true,
+        id: quiz._id,
+        message: message,
+    })
+}
 
 createQuiz = (req, res) => {
     const body = req.body
-
-    if(!body){
-        return res.status(400).json({
+    
+    if(!body || _.isEmpty(body) || !req.hasOwnProperty('body')){
+        return res.status(statusCode.BAD_REQUEST).json({
             success: false,
             message: 'You must provide a Quiz',
         })
@@ -13,28 +27,21 @@ createQuiz = (req, res) => {
     const quiz = new Quiz(body)
 
     if(!quiz){
-        return res.status(400).json({
+        return res.status(statusCode.BAD_REQUEST).json({
             success: false,
             message: err
         })
     }
 
-    quiz 
-        .save()
-        .then(() => {
-            return res.status(201).json({
-                success: true,
-                id: quiz._id,
-                message: 'Quiz Created!',
-            })
-        })
+    quizSave(quiz)
+    quizSaveReturn(res, quiz, 'Quiz Created!', statusCode.ACCEPTED )
 }
 
 updateQuiz = (req, res) => {
     const body = req.body
 
     if(!body){
-        return res.status(400).json({
+        return res.status(statusCode.BAD_REQUEST).json({
             success: false,
             message: 'Your must provide a valid body to update',
         })
@@ -42,7 +49,7 @@ updateQuiz = (req, res) => {
 
     Quiz.findOne({ _id: req.params.id }, (err, quiz) => {
         if(err){
-            return res.status(404).json({
+            return res.status(statusCode.NOT_FOUND).json({
                 success: false,
                 message: err
             })
@@ -68,28 +75,19 @@ updateQuiz = (req, res) => {
         else 
             quiz.status = quiz.status
 
-        quiz
-            .save()
-            .then(() => {
-                return res.status(200).json({
-                    success: true,
-                    id: quiz._id,
-                    message: 'Quiz updated!'
-                })
-            })
-            .catch( error => {
-                return res.status(404).json({
-                    success: false,
-                    message: error
-                })
-            })
+        try {
+            quizSave(quiz)
+            quizSaveReturn(res, quiz, 'Quiz updated!', statusCode.ACCEPTED )
+        } catch (error) {
+            quizSaveReturn(res, quiz, error, statusCode.NOT_FOUND )
+        }
     })
 }
 
 deleteQuiz = async(req,res) => {
     await Quiz.findOneAndDelete({ _id: req.params.id }, (err, quiz) => {
             if(err){
-                return res.status(400).json({ 
+                return res.status(statusCode.BAD_REQUEST).json({ 
                     success: false, 
                     message: err
                 })
@@ -97,7 +95,7 @@ deleteQuiz = async(req,res) => {
 
             if(!quiz){
                 return res
-                    .status(404)
+                    .status(statusCode.NOT_FOUND)
                     .json({ 
                         success: false, 
                         message: `Quiz not found` 
@@ -105,7 +103,7 @@ deleteQuiz = async(req,res) => {
             }
 
             return res
-                .status(200)
+                .status(statusCode.ACCEPTED)
                 .json({ 
                     success: true, 
                     data: quiz 
@@ -116,7 +114,7 @@ deleteQuiz = async(req,res) => {
 getQuizById = async (req, res) => {
     await Quiz.findOne({ _id: req.params.id }, (err, quiz) => {
         if(err){
-            return res.status(400).json({ 
+            return res.status(statusCode.BAD_REQUEST).json({ 
                 success: false, 
                 message: err
             })
@@ -124,13 +122,13 @@ getQuizById = async (req, res) => {
 
         if(!quiz){
             return res
-                .status(404).json({ 
+                .status(statusCode.NOT_FOUND).json({ 
                     success: false, 
                     message: `Note not found` 
                 })
         }
 
-        return res.status(200).json({
+        return res.status(statusCode.ACCEPTED).json({
             success: true, 
             data: quiz
         })
@@ -140,7 +138,7 @@ getQuizById = async (req, res) => {
 getQuiz = async (req, res) => {
     await Quiz.find({}, (err, quiz) => {
         if(err){
-            return res.status(400).json({ 
+            return res.status(statusCode.BAD_REQUEST).json({ 
                 success: false, 
                 message: err
             })
@@ -148,14 +146,14 @@ getQuiz = async (req, res) => {
 
         if(!quiz.length){
             return res
-                .status(404).json({ 
+                .status(statusCode.NOT_FOUND).json({ 
                     success: false, 
                     message: `Note not found` 
                 })
         }
 
         return res
-            .status(200).json({ 
+            .status(statusCode.ACCEPTED).json({ 
                 success: true, 
                 data: quiz 
             })
