@@ -1,10 +1,24 @@
 const User = require('../models/user-model')
+const _ = require('lodash')
+const statusCode = require('http-status-codes');
+
+userSave = (user) => {
+    return user.save()
+}
+
+userSaveReturn = (res, user, message, statusCode) => {
+    return res.status(statusCode).json({
+        success: true,
+        id: user._id,
+        message: message,
+    })
+}
 
 createUser = (req, res) => {
     const body = req.body
 
-    if(!body){
-        return res.status(400).json({
+    if(!body || _.isEmpty(body) || !req.hasOwnProperty('body')){
+        return res.status(statusCode.BAD_REQUEST).json({
             success: false,
             error: 'You must provide Sign-In Information',
         })
@@ -13,7 +27,7 @@ createUser = (req, res) => {
     const user = new User(body)
 
     if(!user){
-        return res.status(400).json({
+        return res.status(statusCode.NOT_FOUND).json({
             success: false,
             error: err
         })
@@ -21,8 +35,7 @@ createUser = (req, res) => {
         
     User.findOne({username: req.body.username}, (err, user_) => {
         if(err) {
-            console.log(err);
-            return res.status(400).json({
+            return res.status(statusCode.BAD_REQUEST).json({
                 success: false,
                 error: err
             })
@@ -35,14 +48,11 @@ createUser = (req, res) => {
             });
 
         } else {
-            user
-                .save()
-                .then(() => {
-                    return res.status(201).json({
-                        success: true,
-                        data: user,
-                    })
-                })
+            userSave(user)
+            return res.status(statusCode.OK).json({
+                success: true,
+                data: user,
+            })
         }
 
     })
@@ -51,8 +61,8 @@ createUser = (req, res) => {
 updateUser = (req, res) => {
     const body = req.body
 
-    if(!body){
-        return res.status(400).json({
+    if(!body || _.isEmpty(body) || !req.hasOwnProperty('body')){
+        return res.status(statusCode.BAD_REQUEST).json({
             success: false,
             error: 'You must provide a body to'
         })
@@ -60,7 +70,7 @@ updateUser = (req, res) => {
 
     User.findOne({_id: req.params.id}, (err,user) => {
         if(err) {
-            return res.status(404).json({
+            return res.status(statusCode.NOT_FOUND).json({
                 success: false,
                 error: err,
             })
@@ -91,27 +101,25 @@ updateUser = (req, res) => {
         else
             user.status = user.status
 
-        user   
-            .save()
-            .then(() => {
-                return res.status(200).json({
-                    success: true,
-                    data: user,
-                })
+        try {
+            userSave(user)
+            return res.status(statusCode.OK).json({
+                success: true,
+                data: user,
             })
-            .catch( error => {
-                return res.status(404).json({
-                    success: false,
-                    error: error,
-                })
+        } catch (error) {
+            return res.status(statusCode.NOT_FOUND).json({
+                success: false,
+                error: error,
             })
+        }
     })
 }
 
 deleteUser = async(req,res) => {
     await User.findOneAndDelete({ _id: req.params.id }, (err,user) => {
             if(err){
-                return res.status(400)
+                return res.status(statusCode.BAD_REQUEST)
                     .json({
                         success: false,
                         message: err
@@ -120,7 +128,7 @@ deleteUser = async(req,res) => {
 
             if(!user){
                 return res
-                    .status(404)
+                    .status(statusCode.NOT_FOUND)
                     .json({
                         success: false,
                         message: 'User not found'
@@ -128,7 +136,7 @@ deleteUser = async(req,res) => {
             }
 
             return res
-                .status(200)
+                .status(statusCode.OK)
                 .json({
                     success: true,
                     data: user
@@ -140,7 +148,7 @@ deleteUser = async(req,res) => {
 getUserById = async (req,res) => {
     await User.findOne({ _id: req.params.id }, (err, user) => {
         if(err){
-            return res.status(400)
+            return res.status(statusCode.BAD_REQUEST)
                 .json({
                     success: false,
                     error: err
@@ -149,7 +157,7 @@ getUserById = async (req,res) => {
 
         if(!user){
             return res
-                .status(404)
+                .status(statusCode.NOT_FOUND)
                 .json({
                     success: false,
                     error: 'User not found'
@@ -157,7 +165,7 @@ getUserById = async (req,res) => {
         }
 
         return res
-            .status(200)
+            .status(statusCode.OK)
             .json({
                 success: true,
                 data: user
@@ -170,7 +178,7 @@ userSignIn = async (req, res) => {
 
     if(!body.username && 
         !body.password){
-        return res.status(400).json({
+        return res.status(statusCode.BAD_REQUEST).json({
             success: false,
             error: 'You must provide a username or/and password'
         })
@@ -178,7 +186,7 @@ userSignIn = async (req, res) => {
 
     User.findOne({username: body.username}, (err, _user) => {
         if(err) {
-            return res.status(404).json({
+            return res.status(statusCode.NOT_FOUND).json({
                 success: false,
                 error: err,
             })
@@ -186,7 +194,7 @@ userSignIn = async (req, res) => {
         
         if(!_user){
             return res
-                .status(404)
+                .status(statusCode.NOT_FOUND)
                 .json({
                     success: false,
                     error: 'User not found'
@@ -194,7 +202,7 @@ userSignIn = async (req, res) => {
         } else {
             User.findOne({password: body.password}, (_err,_user_) => {
                 if(_err) {
-                    return res.status(404).json({
+                    return res.status(statusCode.NOT_FOUND).json({
                         success: false,
                         error: _err,
                     })
@@ -202,7 +210,7 @@ userSignIn = async (req, res) => {
 
                 if(!_user_){
                     return res
-                        .status(404)
+                        .status(statusCode.NOT_FOUND)
                         .json({
                             success: false,
                             error: 'User not found'
@@ -211,7 +219,7 @@ userSignIn = async (req, res) => {
                 
                 if(_user_.status == "1"){
                     return res
-                        .status(404)
+                        .status(statusCode.NOT_FOUND)
                         .json({
                             success: false,
                             error: 'User is already Logged-In'
@@ -220,23 +228,21 @@ userSignIn = async (req, res) => {
 
                 _user_.status = "1"
         
-                _user_   
-                    .save()
-                    .then(() => {
-                        return res
-                            .status(200)
-                            .json({
-                                success: true,
-                                data: _user_
-                            })
-                    })
-                    .catch( error => {
-                        return res.status(404).json({
-                            success: false,
-                            error: error
-                        })
-                    })
+                try {
+                    userSave(_user_)
 
+                    return res
+                        .status(statusCode.OK)
+                        .json({
+                            success: true,
+                            data: _user_
+                        })
+                } catch (error) {
+                    return res.status(statusCode.BAD_REQUEST).json({
+                        success: false,
+                        error: error
+                    })
+                }
             })
         }
     })
@@ -247,7 +253,7 @@ userSignOut = async (req, res) => {
 
     if(!body.username && 
         !body.password){
-        return res.status(400).json({
+        return res.status(statusCode.BAD_REQUEST).json({
             success: false,
             error: 'You must provide a username or/and password'
         })
@@ -255,7 +261,7 @@ userSignOut = async (req, res) => {
 
     User.findOne({username: body.username}, (err, _user) => {
         if(err) {
-            return res.status(404).json({
+            return res.status(statusCode.NOT_FOUND).json({
                 success: false,
                 error: err,
             })
@@ -263,7 +269,7 @@ userSignOut = async (req, res) => {
         
         if(!_user){
             return res
-                .status(404)
+                .status(statusCode.NOT_FOUND)
                 .json({
                     success: false,
                     error: 'User not found'
@@ -271,7 +277,7 @@ userSignOut = async (req, res) => {
         } else {
             User.findOne({password: body.password}, (_err,_user_) => {
                 if(_err) {
-                    return res.status(404).json({
+                    return res.status(statusCode.NOT_FOUND).json({
                         success: false,
                         error: _err,
                     })
@@ -279,7 +285,7 @@ userSignOut = async (req, res) => {
 
                 if(!_user_){
                     return res
-                        .status(404)
+                        .status(statusCode.NOT_FOUND)
                         .json({
                             success: false,
                             error: 'User not found'
@@ -288,7 +294,7 @@ userSignOut = async (req, res) => {
                 
                 if(_user_.status == "0"){
                     return res
-                        .status(400)
+                        .status(statusCode.BAD_REQUEST)
                         .json({
                             success: false,
                             error: 'User is not Logged-In'
@@ -297,23 +303,20 @@ userSignOut = async (req, res) => {
 
                 _user_.status = "0"
         
-                _user_   
-                    .save()
-                    .then(() => {
-                        return res
-                            .status(200)
-                            .json({
-                                success: true,
-                                data: _user_
-                            })
-                    })
-                    .catch( error => {
-                        return res.status(404).json({
-                            success: false,
-                            error: error
+                try {
+                    userSave(_user_)
+                    return res
+                        .status(statusCode.OK)
+                        .json({
+                            success: true,
+                            data: _user_
                         })
+                } catch (error) {
+                    return res.status(statusCode.BAD_REQUEST).json({
+                        success: false,
+                        error: error
                     })
-
+                }
             })
         }
     })
