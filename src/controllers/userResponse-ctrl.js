@@ -1,10 +1,24 @@
 const UserResponse = require('../models/userRespose-model')
+const _ = require('lodash')
+const statusCode = require('http-status-codes');
+
+userResponseSave = (userResponse) => {
+    return userResponse.save()
+}
+
+userResponseSaveReturn = (res, userResponse, message, statusCode) => {
+    return res.status(statusCode).json({
+        success: true,
+        id: userResponse._id,
+        message: message,
+    })
+}
 
 createUserResponse = (req, res) => {
     const body = req.body
-
-    if(!body){
-        return res.status(400).json({
+    
+    if(!body || _.isEmpty(body) || !req.hasOwnProperty('body')){
+        return res.status(statusCode.BAD_REQUEST).json({
             success: false,
             message: 'You must provide a UserResponse',
         })
@@ -13,28 +27,21 @@ createUserResponse = (req, res) => {
     const userResponse = new UserResponse(body)
 
     if(!userResponse){
-        return res.status(400).json({
+        return res.status(statusCode.NOT_FOUND).json({
             success: false,
             message: err
         })
     }
 
-    userResponse 
-        .save()
-        .then(() => {
-            return res.status(201).json({
-                success: true,
-                id: userResponse._id,
-                message: 'UserResponse Created!',
-            })
-        })
+    userResponseSave(userResponse)
+    userResponseSaveReturn(res, userResponse, 'UserResponse Created!', statusCode.OK)
 }
 
 updateUserResponse = (req, res) => {
     const body = req.body
 
-    if(!body){
-        return res.status(400).json({
+    if(!body || _.isEmpty(body) || !req.hasOwnProperty('body')){
+        return res.status(statusCode.BAD_REQUEST).json({
             success: false,
             message: 'Your must provide a valid body to update',
         })
@@ -42,7 +49,7 @@ updateUserResponse = (req, res) => {
 
     UserResponse.findOne({ _id: req.params.id }, (err, userResponse) => {
         if(err){
-            return res.status(404).json({
+            return res.status(statusCode.NOT_FOUND).json({
                 success: false,
                 message: err
             })
@@ -63,21 +70,12 @@ updateUserResponse = (req, res) => {
         else
             userResponse.userId = userResponse.userId
 
-        userResponse
-            .save()
-            .then(() => {
-                return res.status(200).json({
-                    success: true,
-                    id: userResponse._id,
-                    message: 'UserResponse updated!'
-                })
-            })
-            .catch( error => {
-                return res.status(404).json({
-                    success: false,
-                    message: error
-                })
-            })
+        try {
+            userResponseSave(userResponse)
+            userResponseSaveReturn(res, userResponse, 'UserResponse updated!', statusCode.OK)
+        } catch (error) {
+            userResponseSaveReturn(res, userResponse, 'UserResponse not updated!', statusCode.NOT_FOUND)
+        }    
     })
 }
 
@@ -85,7 +83,7 @@ deleteUserResponse = async(req, res) => {
     await UserResponse.findOneAndDelete(
         { _id: req.params.id }, (err, userResponse) => {
             if(err){
-                return res.status(400).json({ 
+                return res.status(statusCode.BAD_REQUEST).json({ 
                     success: false, 
                     message: err
                 })
@@ -93,12 +91,12 @@ deleteUserResponse = async(req, res) => {
 
             if(!userResponse){
                 return res
-                    .status(404).json({ 
+                    .status(statusCode.NOT_FOUND).json({ 
                         success: false, 
                         message: `Note not found` })
             }
 
-            return res.status(200).json({ 
+            return res.status(statusCode.OK).json({ 
                 success: true, 
                 data: userResponse 
             })
@@ -108,7 +106,7 @@ deleteUserResponse = async(req, res) => {
 getUserResponseById = async (req, res) => {
     await UserResponse.findOne({ _id: req.params.id }, (err, userResponse) => {
         if(err){
-            return res.status(400).json({ 
+            return res.status(statusCode.BAD_REQUEST).json({ 
                 success: false, 
                 message: err
             })
@@ -116,13 +114,13 @@ getUserResponseById = async (req, res) => {
 
         if(!userResponse){
             return res
-                .status(404).json({ 
+                .status(statusCode.NOT_FOUND).json({ 
                     success: false, 
                     message: `Note not found` 
                 })
         }
 
-        return res.status(200).json({
+        return res.status(statusCode.OK).json({
             success: true, 
             data: userResponse
         })
@@ -132,7 +130,7 @@ getUserResponseById = async (req, res) => {
 getUserResponse = async (req, res) => {
     await UserResponse.find({}, (err, userResponse) => {
         if(err){
-            return res.status(400).json({ 
+            return res.status(statusCode.BAD_REQUEST).json({ 
                 success: false, 
                 message: err
             })
@@ -140,14 +138,14 @@ getUserResponse = async (req, res) => {
 
         if(!userResponse.length){
             return res
-                .status(404).json({ 
+                .status(statusCode.NOT_FOUND).json({ 
                     success: false, 
                     message: `Note not found` 
                 })
         }
 
         return res
-            .status(200).json({ 
+            .status(statusCode.OK).json({ 
                 success: true, 
                 data: userResponse 
             })
