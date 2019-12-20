@@ -1,48 +1,48 @@
 const Question = require('../models/question-model')
 const Quiz = require('../models/quiz-model')
 const _ = require('lodash')
+const statusCode = require('http-status-codes');
+
+questionSave = (question) => {
+    return question.save()
+}
+
+questionSaveReturn = (res, question, message, statusCode) => {
+    return res.status(statusCode).json({
+        success: true,
+        id: question._id,
+        message: message,
+    })
+}
 
 createQuestion = (req, res) => {
     const body = req.body
-    console.log('createQuestion', body);
     
     if(!body || _.isEmpty(body) || !req.hasOwnProperty('body')){
-        // console.log('createQuestion', "Inside");
-        return res.status(400).json({
+        return res.status(statusCode.BAD_REQUEST).json({
             success: false,
             message: 'You must provide a question',
         })
     }
-    // console.log('createQuestion', "after if");
 
     const question = new Question(body)
 
-    // console.log('createQuestion', question);
     if(!question){
-        // console.log('createQuestion 2', "Inside");
-        return res.status(400).json({
+        return res.status(statusCode.BAD_REQUEST).json({
             success: false,
             message: err
         })
     }
 
-    question 
-        .save()
-        .then(() => {
-            // console.log('createQuestion 3', "Successfully");
-            return res.status(201).json({
-                success: true,
-                id: question._id,
-                message: 'Question Created!',
-            })
-        })
+    questionSave(question)
+    questionSaveReturn(res, question, 'Question Created!', statusCode.ACCEPTED)
 }
 
 updateQuestion = (req, res) => {
     const body = req.body
 
-    if(!body){
-        return res.status(400).json({
+    if(!body || _.isEmpty(body) || !req.hasOwnProperty('body')){
+        return res.status(statusCode.BAD_REQUEST).json({
             success: false,
             message: 'Your must provide a valid body to update',
         })
@@ -50,7 +50,7 @@ updateQuestion = (req, res) => {
 
     Question.findOne({ _id: req.params.id }, (err, question) => {
         if(err){
-            return res.status(404).json({
+            return res.status(statusCode.BAD_REQUEST).json({
                 success: false,
                 message: err
             })
@@ -91,21 +91,12 @@ updateQuestion = (req, res) => {
         else
             question.point = question.point
 
-        question
-            .save()
-            .then(() => {
-                return res.status(200).json({
-                    success: true,
-                    id: question._id,
-                    message: 'Question updated!'
-                })
-            })
-            .catch( error => {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Question not updated!'
-                })
-            })
+        try {
+            questionSave(question)
+            questionSaveReturn(res, question, 'Question updated!', statusCode.ACCEPTED)
+        } catch (error) {
+            questionSaveReturn(res, question, 'Question not updated!', statusCode.NOT_FOUND)
+        }    
     })
 }
 
@@ -113,7 +104,7 @@ deleteQuestion = async (req, res) => {
     await Question.findOneAndDelete(
         { _id: req.params.id }, (err, question) => {
             if(err){
-                return res.status(400).json({ 
+                return res.status(statusCode.BAD_REQUEST).json({ 
                     success: false, 
                     message: err
                 })
@@ -121,12 +112,12 @@ deleteQuestion = async (req, res) => {
 
             if(!question){
                 return res
-                    .status(404).json({ 
+                    .status(statusCode.BAD_REQUEST).json({ 
                         success: false, 
                         message: `Note not found` })
             }
 
-            return res.status(200).json({ 
+            return res.status(statusCode.OK).json({ 
                 success: true, 
                 data: question 
             })
@@ -136,7 +127,7 @@ deleteQuestion = async (req, res) => {
 getQuestionById = async (req, res) => {
     await Question.findOne({ _id: req.params.id }, (err, question) => {
         if(err){
-            return res.status(400).json({ 
+            return res.status(statusCode.BAD_REQUEST).json({ 
                 success: false, 
                 message: err
             })
@@ -144,7 +135,7 @@ getQuestionById = async (req, res) => {
 
         if(!question){
             return res
-                .status(404).json({ 
+                .status(statusCode.NOT_FOUND).json({ 
                     success: false, 
                     message: `Question not found` 
                 })
@@ -152,7 +143,7 @@ getQuestionById = async (req, res) => {
 
         Quiz.findOne({_id: question.quizId}, (err1, quiz) =>{
             if(err1){
-                return res.status(400).json({ 
+                return res.status(statusCode.BAD_REQUEST).json({ 
                     success: false, 
                     message: err1
                 })
@@ -160,7 +151,7 @@ getQuestionById = async (req, res) => {
     
             if(!quiz){
                 return res
-                    .status(404).json({ 
+                    .status(statusCode.NOT_FOUND).json({ 
                         success: false, 
                         message: `Quiz for question not found` 
                     })
@@ -170,7 +161,7 @@ getQuestionById = async (req, res) => {
             nQues.quizName = quiz.name
             nQues.quizDescription = quiz.description
             
-            return res.status(200).json({
+            return res.status(statusCode.OK).json({
                 success: true, 
                 data: question,
                 dataExtra: nQues
@@ -183,7 +174,7 @@ getQuestionById = async (req, res) => {
 getQuestion = async (req, res) => {
     await Question.find({}, (err, question) => {
         if(err){
-            return res.status(400).json({ 
+            return res.status(statusCode.BAD_REQUEST).json({ 
                 success: false, 
                 message: err
             })
@@ -191,7 +182,7 @@ getQuestion = async (req, res) => {
 
         if(!question.length){
             return res
-                .status(404).json({ 
+                .status(statusCode.NOT_FOUND).json({ 
                     success: false, 
                     message: `Note not found` 
                 })
@@ -200,7 +191,7 @@ getQuestion = async (req, res) => {
         var nQues = []
         Quiz.find({}, (err1, quizzies) => {
             if(err1){
-                return res.status(400).json({ 
+                return res.status(statusCode.BAD_REQUEST).json({ 
                     success: false, 
                     message: err1
                 })
@@ -208,7 +199,7 @@ getQuestion = async (req, res) => {
     
             if(!quizzies.length){
                 return res
-                    .status(404).json({ 
+                    .status(statusCode.NOT_FOUND).json({ 
                         success: false, 
                         message: `Quiz for questions not found` 
                     })
@@ -223,7 +214,7 @@ getQuestion = async (req, res) => {
             }
 
             return res
-                .status(200).json({ 
+                .status(statusCode.OK).json({ 
                     success: true, 
                     data: question,
                     dataExtra: nQues
