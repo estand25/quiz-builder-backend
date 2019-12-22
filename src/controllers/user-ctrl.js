@@ -23,7 +23,7 @@ createUser = (req, res) => {
             error: 'You must provide Sign-In Information',
         })
     }
-
+    
     const user = new User(body)
 
     if(!user){
@@ -184,7 +184,7 @@ userSignIn = async (req, res) => {
         })
     }
 
-    User.findOne({username: body.username}, (err, _user) => {
+    User.findOne({username: body.username, password: body.password}, (err, _user) => {
         if(err) {
             return res.status(statusCode.NOT_FOUND).json({
                 success: false,
@@ -200,50 +200,33 @@ userSignIn = async (req, res) => {
                     error: 'User not found'
                 })
         } else {
-            User.findOne({password: body.password}, (_err,_user_) => {
-                if(_err) {
-                    return res.status(statusCode.NOT_FOUND).json({
+
+            if(_user.status == "1"){
+                return res
+                    .status(statusCode.NOT_FOUND)
+                    .json({
                         success: false,
-                        error: _err,
+                        error: 'User is already Logged-In'
                     })
-                }
+            }
 
-                if(!_user_){
-                    return res
-                        .status(statusCode.NOT_FOUND)
-                        .json({
-                            success: false,
-                            error: 'User not found'
-                        })
-                }
-                
-                if(_user_.status == "1"){
-                    return res
-                        .status(statusCode.NOT_FOUND)
-                        .json({
-                            success: false,
-                            error: 'User is already Logged-In'
-                        })
-                }
+            _user.status = "1"
+    
+            try {
+                userSave(_user)
 
-                _user_.status = "1"
-        
-                try {
-                    userSave(_user_)
-
-                    return res
-                        .status(statusCode.OK)
-                        .json({
-                            success: true,
-                            data: _user_
-                        })
-                } catch (error) {
-                    return res.status(statusCode.BAD_REQUEST).json({
-                        success: false,
-                        error: error
+                return res
+                    .status(statusCode.OK)
+                    .json({
+                        success: true,
+                        data: _user
                     })
-                }
-            })
+            } catch (error) {
+                return res.status(statusCode.BAD_REQUEST).json({
+                    success: false,
+                    error: error
+                })
+            }
         }
     })
 }
@@ -259,7 +242,7 @@ userSignOut = async (req, res) => {
         })
     }
 
-    User.findOne({username: body.username}, (err, _user) => {
+    User.findOne({username: body.username, password: body.password}, (err, _user) => {
         if(err) {
             return res.status(statusCode.NOT_FOUND).json({
                 success: false,
@@ -275,49 +258,33 @@ userSignOut = async (req, res) => {
                     error: 'User not found'
                 })
         } else {
-            User.findOne({password: body.password}, (_err,_user_) => {
-                if(_err) {
-                    return res.status(statusCode.NOT_FOUND).json({
-                        success: false,
-                        error: _err,
-                    })
-                }
 
-                if(!_user_){
-                    return res
-                        .status(statusCode.NOT_FOUND)
-                        .json({
-                            success: false,
-                            error: 'User not found'
-                        })
-                }
-                
-                if(_user_.status == "0"){
-                    return res
-                        .status(statusCode.BAD_REQUEST)
-                        .json({
-                            success: false,
-                            error: 'User is not Logged-In'
-                        })
-                }
-
-                _user_.status = "0"
-        
-                try {
-                    userSave(_user_)
-                    return res
-                        .status(statusCode.OK)
-                        .json({
-                            success: true,
-                            data: _user_
-                        })
-                } catch (error) {
-                    return res.status(statusCode.BAD_REQUEST).json({
+            if(_user.status == "0"){
+                return res
+                    .status(statusCode.NOT_FOUND)
+                    .json({
                         success: false,
-                        error: error
+                        error: 'User is not Logged-In'
                     })
-                }
-            })
+            }
+
+            _user.status = "0"
+    
+            try {
+                userSave(_user)
+
+                return res
+                    .status(statusCode.OK)
+                    .json({
+                        success: true,
+                        data: _user
+                    })
+            } catch (error) {
+                return res.status(statusCode.BAD_REQUEST).json({
+                    success: false,
+                    error: error
+                })
+            }
         }
     })
 }
