@@ -56,47 +56,62 @@ updateQuestion = (req, res) => {
             })
         }
 
-        if(body.answer !== undefined)
-            question.answer = body.answer
-        else   
-            question.answer = question.answer
-        
-        if(body.options !== undefined)
-            question.options = body.options
-        else
-            question.options = question.options
-        
-        if(body.quizId !== undefined)
-            question.quizId = body.quizId
-        else
-            question.quizId = question.quizId
 
-        if(body.status !== undefined)
-            question.status = body.status
-        else
-            question.status = question.status
+        Quiz.findOne({_id: question.quizId}, (err1, quiz) =>{
+            if(err1){
+                return res.status(statusCode.BAD_REQUEST).json({ 
+                    success: false, 
+                    message: err1
+                })
+            }
 
-        if(body.question !== undefined)
-            question.question = body.question
-        else
-            question.question = question.question
+            if(body.answer !== undefined)
+                question.answer = body.answer
+            else   
+                question.answer = question.answer
+            
+            if(body.options !== undefined)
+                question.options = body.options
+            else
+                question.options = question.options
+            
+            if(body.quizId !== undefined)
+                question.quizId = body.quizId
+            else
+                question.quizId = question.quizId
 
-        if(body.order !== undefined)
-            question.order = body.order
-        else
-            question.order = question.order
+            if(body.quizName !== undefined)
+                question.quizName = body.quizName
+            else
+                question.quizName = question.quizName
 
-        if(body.point !== undefined)
-            question.point = body.point
-        else
-            question.point = question.point
+            if(body.status !== undefined)
+                question.status = body.status
+            else
+                question.status = question.status
 
-        try {
-            questionSave(question)
-            questionSaveReturn(res, question, 'Question updated!', statusCode.OK)
-        } catch (error) {
-            questionSaveReturn(res, question, 'Question not updated!', statusCode.NOT_FOUND)
-        }    
+            if(body.question !== undefined)
+                question.question = body.question
+            else
+                question.question = question.question
+
+            if(body.order !== undefined)
+                question.order = body.order
+            else
+                question.order = question.order
+
+            if(body.point !== undefined)
+                question.point = body.point
+            else
+                question.point = question.point
+
+            try {
+                questionSave(question)
+                questionSaveReturn(res, question, 'Question updated!', statusCode.OK)
+            } catch (error) {
+                questionSaveReturn(res, question, 'Question not updated!', statusCode.NOT_FOUND)
+            }        
+        })
     })
 }
 

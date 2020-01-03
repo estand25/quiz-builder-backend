@@ -6,6 +6,7 @@ const Question = new Schema(
         answer: String,
         options: Array,
         quizId: String,
+        quizName: String,
         question: String,
         status: {
             type: Number, 
