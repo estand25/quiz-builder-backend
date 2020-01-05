@@ -55,10 +55,15 @@ updateScore = (req, res) => {
             })
         }
 
+        if(body.quizName !== undefined)
+            score.quizName = body.quizName
+        else
+            score.quizName = score.quizName
+
         if(body.quizId !== undefined)
             score.quizId = body.quizId
         else
-            score.quizId = body.quizId
+            score.quizId = score.quizId
 
         if(body.userId !== undefined)    
             score.userId = body.userId

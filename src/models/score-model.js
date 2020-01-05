@@ -3,6 +3,7 @@ const Schema = mongoose.Schema
 
 const Score = new Schema(
     {
+        quizName: String,
         quizId: String,
         userId: String,
         score: String,

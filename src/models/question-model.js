@@ -16,7 +16,8 @@ const Question = new Schema(
             default: 0},
         point: {
             type: Number, 
-            default: 0}
+            default: 0},
+        userId: String
     },
     { timestamps: true }
 )
