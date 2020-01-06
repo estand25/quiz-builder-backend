@@ -55,6 +55,11 @@ updateQuiz = (req, res) => {
             })
         }
 
+        if(body.userId !== undefined)
+            quiz.userId = body.userId
+        else 
+            quiz.userId = quiz.userId
+
         if(body.name !== undefined)  
             quiz.name = body.name
         else

@@ -65,6 +65,11 @@ updateQuestion = (req, res) => {
                 })
             }
 
+            if(body.userId !== undefined)
+                question.userId = body.userId
+            else 
+                question.userId = question.userId
+
             if(body.answer !== undefined)
                 question.answer = body.answer
             else   
